@@ -1,4 +1,4 @@
-"""results_table.py — PSEUDO-CODE. Bạn phải tự hoàn thiện mọi hàm có `raise NotImplementedError`.
+"""results_table.py — lưu kết quả từng lần chạy ra JSON và điền experiments.xlsx.
 
 Nhiệm vụ: lưu kết quả từng lần chạy ra JSON, rồi điền vào experiments.xlsx từ mẫu
 templates/experiment_table_template.xlsx (đừng gõ tay hàng chục dòng, rất dễ sai).
@@ -19,12 +19,18 @@ from pathlib import Path
 def save_result(result: dict, results_dir: str = "../results") -> str:
     """Ghi result["cfg"], result["history"], result["summary"] (KHÔNG ghi best_state) ra
     <results_dir>/<exp_id>.json. Trả về đường dẫn file. Tạo thư mục nếu chưa có."""
-    raise NotImplementedError  # TODO
+    out = Path(results_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    path = out / f"{result['cfg']['exp_id']}.json"
+    payload = {k: result[k] for k in ("cfg", "history", "summary")}
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=1, allow_nan=True), encoding="utf-8")
+    return str(path)
 
 
 def load_results(results_dir: str = "../results") -> list[dict]:
     """Đọc mọi file *.json trong results_dir, trả về danh sách dict (sắp theo exp_id)."""
-    raise NotImplementedError  # TODO
+    files = sorted(Path(results_dir).glob("*.json"))
+    return [json.loads(f.read_text(encoding="utf-8")) for f in files]
 
 
 def to_row(result: dict, eval_scores: dict | None = None, notes: str = "") -> dict:
